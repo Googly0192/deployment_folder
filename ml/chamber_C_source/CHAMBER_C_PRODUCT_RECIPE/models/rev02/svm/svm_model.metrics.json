@@ -1,0 +1,112 @@
+{
+  "accuracy": 0.9833333333333333,
+  "macro_f1": 0.98308863821023,
+  "classification_report": {
+    "fault_1_rf_surge": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 30.0
+    },
+    "fault_2_throttle_leak": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 30.0
+    },
+    "fault_3_gas_drift": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 30.0
+    },
+    "fault_4_he_leak": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 31.0
+    },
+    "fault_5_wall_decay": {
+      "precision": 0.9310344827586207,
+      "recall": 0.9,
+      "f1-score": 0.9152542372881356,
+      "support": 30.0
+    },
+    "normal": {
+      "precision": 0.98,
+      "recall": 0.9865771812080537,
+      "f1-score": 0.9832775919732442,
+      "support": 149.0
+    },
+    "accuracy": 0.9833333333333333,
+    "macro avg": {
+      "precision": 0.9851724137931036,
+      "recall": 0.981096196868009,
+      "f1-score": 0.98308863821023,
+      "support": 300.0
+    },
+    "weighted avg": {
+      "precision": 0.9831701149425286,
+      "recall": 0.9833333333333333,
+      "f1-score": 0.9832199610755248,
+      "support": 300.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      30,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      30,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      30,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      31,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      27,
+      3
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      2,
+      147
+    ]
+  ],
+  "log_loss": 0.05934338095618493,
+  "confidence_summary": {
+    "mean_top_class_confidence": 0.9681780326946569,
+    "p10_top_class_confidence": 0.9435198464894252,
+    "p50_top_class_confidence": 0.9842868717376583,
+    "p90_top_class_confidence": 0.9955036710057898
+  }
+}

@@ -1,0 +1,136 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ProcAI
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./database_schema/ProcAI_Schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database_schema/insertions.sql:/docker-entrypoint-initdb.d/02-insertions.sql:ro
+      - ./database_schema/seed_violation_types.sql:/docker-entrypoint-initdb.d/03-seed-violation-types.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ProcAI"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  apiserver:
+    image: flyslips/procai-suite:api
+    build:
+      context: ..
+      dockerfile: Production_Code/Dockerfile.api
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/ProcAI
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DECODE_RESPONSES: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/docs')"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  violations-detector:
+    image: flyslips/procai-suite:workers
+    build:
+      context: ..
+      dockerfile: Production_Code/Dockerfile.workers
+    command: ["python", "-m", "workers.violations_detector"]
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DECODE_RESPONSES: "true"
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/ProcAI
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  inference-workers:
+    image: flyslips/procai-suite:workers
+    build:
+      context: ..
+      dockerfile: Production_Code/Dockerfile.workers
+    command: ["python", "-m", "workers.run_workers", "--num-workers", "4", "--cache-size", "5", "--redis-host", "redis", "--redis-port", "6379"]
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DECODE_RESPONSES: "true"
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/ProcAI
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./ml:/app/ml:ro
+
+  svm-inference-worker:
+    image: flyslips/procai-suite:workers
+    build:
+      context: ..
+      dockerfile: Production_Code/Dockerfile.workers
+    command: ["python", "-m", "workers.svm_inference_worker", "--worker-id", "1", "--cache-size", "5", "--redis-host", "redis", "--redis-port", "6379"]
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DECODE_RESPONSES: "true"
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/ProcAI
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  pca-worker:
+    image: flyslips/procai-suite:pca
+    build:
+      context: .
+      dockerfile: Dockerfile.pca
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      API_HOST: apiserver
+      API_PORT: 8000
+    depends_on:
+      redis:
+        condition: service_healthy
+      apiserver:
+        condition: service_healthy
+    volumes:
+      # The PCA binary resolves model paths from the API and reads files at runtime.
+      # Mount the ml/ directory so the model CSV/artifact files are available.
+      - ./ml:/app/ml:ro
+
+  frontend:
+    image: flyslips/procai-suite:frontend
+    build:
+      context: ./procvue_frontend
+      dockerfile: Dockerfile
+      args:
+        #VITE_API_URL: "https://run.app"
+        #VITE_WS_URL: "wss://apiserver-xyz-uc.a.run.app"
+        VITE_API_URL: http://localhost:8000
+        VITE_WS_URL: ws://localhost:8000
+    depends_on:
+      apiserver:
+        condition: service_healthy
+    ports:
+      - "4173:80"
+
+volumes:
+  postgres-data:

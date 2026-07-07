@@ -1,0 +1,9 @@
+{
+  "final_loss": 0.014502521968730118,
+  "global_error_mean": 0.33960863947868347,
+  "global_error_std": 0.15334001183509827,
+  "num_training_windows": 1459,
+  "num_features": 5,
+  "future_error_95_mean": 0.17232075333595276,
+  "future_error_95_max": 0.34743714332580566
+}

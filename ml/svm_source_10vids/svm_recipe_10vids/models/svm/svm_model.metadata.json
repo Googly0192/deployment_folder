@@ -1,0 +1,35 @@
+{
+  "created_utc": "2026-03-16T23:49:37.973203+00:00",
+  "training_file": "C:\\Projects\\AI\\svm\\data\\training\\svm_10sensors_training.csv",
+  "feature_names": [
+    "sensor1",
+    "sensor2",
+    "sensor3",
+    "sensor4",
+    "sensor5",
+    "sensor6",
+    "sensor7",
+    "sensor8",
+    "sensor9",
+    "sensor10"
+  ],
+  "label_values": [
+    "fault_1",
+    "fault_2",
+    "fault_3",
+    "fault_4",
+    "fault_5",
+    "normal"
+  ],
+  "rows_total": 1200,
+  "rows_train": 960,
+  "rows_eval": 240,
+  "kernel": "rbf",
+  "c": 1.0,
+  "gamma": "scale",
+  "random_state": 42,
+  "stratified_split": true,
+  "probability_enabled": true,
+  "confidence_threshold": 0.6,
+  "unknown_label": "UNKNOWN"
+}

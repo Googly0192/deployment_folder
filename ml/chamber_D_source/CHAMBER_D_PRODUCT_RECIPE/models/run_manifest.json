@@ -1,0 +1,13 @@
+{
+  "training_file": "C:\\Projects\\ml_desktop_enterprise\\input\\training\\ver2\\semi_train_supervised_15f.csv",
+  "test_file": null,
+  "output_root": "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_D",
+  "artifacts": {
+    "svm": [
+      "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_D\\svm\\svm_model.metadata.json",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_D\\svm\\svm_model.metrics.json",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_D\\svm\\svm_model.sha256.json",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_D\\svm\\svm_model.skops"
+    ]
+  }
+}

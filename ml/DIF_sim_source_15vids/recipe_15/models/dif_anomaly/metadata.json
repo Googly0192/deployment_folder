@@ -1,0 +1,6 @@
+{
+  "model_file": "dif_model.safetensors",
+  "scaler_file": "scaler.skops",
+  "metadata_file": "metadata.skops",
+  "latent_base_file": "latent_base.safetensors"
+}

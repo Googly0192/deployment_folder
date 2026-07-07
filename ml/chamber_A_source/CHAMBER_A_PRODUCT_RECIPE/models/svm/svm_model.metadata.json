@@ -1,0 +1,30 @@
+{
+  "created_utc": "2026-06-11T20:33:32.063490+00:00",
+  "training_file": "C:\\Projects\\ml_desktop_enterprise\\input\\training\\ver2\\semi_train_supervised_5f.csv",
+  "feature_names": [
+    "temp_c",
+    "pressure_mtorr",
+    "rf_power_w",
+    "gas_flow_sccm",
+    "bias_v"
+  ],
+  "label_values": [
+    "fault_1_rf_surge",
+    "fault_2_throttle_leak",
+    "fault_3_gas_drift",
+    "fault_4_he_leak",
+    "fault_5_wall_decay",
+    "normal"
+  ],
+  "rows_total": 1500,
+  "rows_train": 1200,
+  "rows_eval": 300,
+  "kernel": "rbf",
+  "c": 2.0,
+  "gamma": "scale",
+  "random_state": 42,
+  "stratified_split": true,
+  "probability_enabled": true,
+  "confidence_threshold": 0.6,
+  "unknown_label": "UNKNOWN"
+}

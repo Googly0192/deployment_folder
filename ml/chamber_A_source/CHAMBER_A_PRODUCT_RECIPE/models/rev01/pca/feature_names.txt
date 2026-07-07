@@ -1,0 +1,5 @@
+temp_c
+pressure_mtorr
+rf_power_w
+gas_flow_sccm
+bias_v

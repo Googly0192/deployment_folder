@@ -1,0 +1,26 @@
+{
+  "training_file": "C:\\Projects\\ml_desktop_enterprise\\input\\training\\ver2\\semi_train_unsupervised_8f.csv",
+  "test_file": null,
+  "output_root": "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_B",
+  "artifacts": {
+    "dif": [
+      "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_B\\dif\\dif_model.safetensors",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_B\\dif\\scaler.skops",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_B\\dif\\latent_base.safetensors",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_B\\dif\\metadata.skops"
+    ],
+    "pca": [
+      "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_B\\pca\\pca_stats.csv",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_B\\pca\\pca_loadings.csv",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_B\\pca\\pca_ellipses.svg",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_B\\pca\\pca_ellipse_params.txt",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_B\\pca\\pca_limits.txt",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_B\\pca\\pca_scree.svg"
+    ],
+    "lstm": [
+      "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_B\\lstm\\lstm_ed.artifacts.json",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_B\\lstm\\lstm_ed.metrics.json",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\ver2\\chamber_B\\lstm\\lstm_ed.onnx"
+    ]
+  }
+}

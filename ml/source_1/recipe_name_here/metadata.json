@@ -1,0 +1,19 @@
+{
+  "model_type": "DIF",
+  "created_at": "2026-01-26",
+  "context_name": "source_1:recipe_name_here",
+  "source": "source_1",
+  "process_step": "recipe_name_here",
+  "hyperparameters": {
+    "n_components": null,
+    "alpha": 0.01,
+    "window_size": 100
+  },
+  "training_info": {
+    "n_samples": 1000,
+    "n_features": 5,
+    "training_date": null
+  },
+  "active_model": "dif_model.safetensors",
+  "description": "DIF anomaly detector for recipe_name_here"
+}

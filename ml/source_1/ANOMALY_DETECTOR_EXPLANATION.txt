@@ -1,0 +1,325 @@
+================================================================================
+DIF + PCA + Hotelling's T² ANOMALY DETECTOR - TECHNICAL EXPLANATION
+================================================================================
+
+OVERVIEW
+--------
+The detector combines three complementary statistical techniques to identify
+process anomalies in real-time sensor data:
+
+1. PCA (Principal Component Analysis)
+2. Hotelling's T² Statistic
+3. DIF (Dynamic Inner Floor)
+
+
+================================================================================
+1. PCA (PRINCIPAL COMPONENT ANALYSIS)
+================================================================================
+
+PURPOSE
+-------
+Dimensionality reduction while preserving variance in the data.
+
+HOW IT WORKS
+------------
+- Takes multi-channel sensor data (e.g., 5 temperature/pressure channels)
+- Identifies uncorrelated "directions" of maximum variance
+- Transforms data into a lower-dimensional space 
+  Example: 5 channels → 3 PCA components
+- Automatically selects components to capture 95% of variance
+
+BENEFIT
+-------
+- Reduces noise and computational complexity
+- Simplifies anomaly detection in compressed space
+- Eliminates multicollinearity between sensors
+
+
+================================================================================
+2. HOTELLING'S T² STATISTIC
+================================================================================
+
+PURPOSE
+-------
+Multivariate statistical test for detecting anomalies in correlated data.
+
+HOW IT WORKS
+------------
+- Measures how "far" a sample is from normal operation in PCA space
+- For each new sample, calculates the T² statistic:
+
+    T² = Σ(score_i / std_i)²  for i=1 to p components
+
+- Compares against a control limit (99% confidence by default)
+- Uses either chi-square distribution (large samples > 30)
+  or F-distribution (small samples ≤ 30)
+
+CONTROL LIMIT CALCULATION
+-------------------------
+Large Sample (n > 30):
+  T²_limit = χ²(p, 1-α)
+
+Small Sample (n ≤ 30):
+  T²_limit = ((n-1)*p / (n-p)) * F(p, n-p, 1-α)
+
+Where:
+  p = number of PCA components
+  n = number of training samples
+  α = significance level (default: 0.01 = 99% confidence)
+
+EXAMPLE
+-------
+If T²_limit = 11.34:
+  - T² = 2.64 → Normal (2.64 < 11.34)
+  - T² = 19.28 → Anomaly (19.28 > 11.34)
+
+BENEFIT
+-------
+- Statistically rigorous with known error probability
+- Accounts for correlation between channels
+- Works in compressed PCA space, reducing false positives
+
+
+================================================================================
+3. DIF (DYNAMIC INNER FLOOR)
+================================================================================
+
+PURPOSE
+-------
+Establish baseline bounds for normal operation and identify which specific
+sensors deviated from normal.
+
+HOW IT WORKS
+------------
+During Training:
+  - Calculates mean ± 3σ for each channel
+  - Covers ~99.7% of normal operation range
+
+During Prediction:
+  - Checks if each channel exceeds its baseline bounds
+  - Returns list of channel indices that violated bounds
+
+EXAMPLE
+-------
+Channel 1 baseline: [-2.5, 3.2]  (mean - 3σ to mean + 3σ)
+Channel 2 baseline: [-1.8, 2.9]
+...
+
+New sample: [5.1, 0.5, ...]
+  - Channel 1: 5.1 > 3.2 → VIOLATION (index 0)
+  - Channel 2: 0.5 within [-1.8, 2.9] → OK
+  
+DIF violations: [0]
+
+BENEFIT
+-------
+- Provides explainability—shows WHICH sensors deviated
+- Complements T² by identifying root causes
+- Simple, interpretable rule-based anomaly detection
+
+
+================================================================================
+DATA FLOW PIPELINE
+================================================================================
+
+Raw Data (5 sensor channels)
+    ↓
+[Standardize] - Remove mean, scale by standard deviation
+    ↓
+[PCA Transform] - Compress to 3 uncorrelated components
+    ↓
+[Hotelling's T²] - Calculate multivariate anomaly statistic
+    ↓
+[DIF Check] - Identify baseline violations per channel
+    ↓
+[Contributions] - Calculate % contribution of each channel to anomaly
+    ↓
+[Publish to Redis] - Send results via Pub/Sub
+    ↓
+[WebSocket Stream] - Frontend receives real-time updates
+    ↓
+[Plotly Dashboard] - Interactive visualization
+
+
+================================================================================
+KEY OUTPUTS
+================================================================================
+
+anomaly_score
+  Type: Float [0, 1]
+  Meaning: Normalized severity (0=normal, 1=severe)
+  Calculation: min(1.0, T² / (2 * T²_limit))
+
+t2_statistic
+  Type: Float
+  Meaning: Raw Hotelling's T² value
+  Interpretation: Higher = more anomalous
+
+t2_limit
+  Type: Float
+  Meaning: Control limit for 99% confidence
+  Interpretation: Sample is anomalous if T² > limit
+
+is_anomaly
+  Type: Boolean
+  Meaning: True if T² > control limit
+  Interpretation: Statistically significant anomaly
+
+dif_violations
+  Type: List[int]
+  Meaning: Channel indices that exceeded baseline bounds
+  Interpretation: Which sensors caused the anomaly
+
+contributions
+  Type: Dict[str, float]
+  Meaning: % contribution of each channel to total anomaly
+  Interpretation: "channel_1": 0.35 means channel 1 caused 35% of anomaly
+
+timestamp
+  Type: ISO string
+  Meaning: When the prediction was made
+  Interpretation: For time-series correlation
+
+
+================================================================================
+EXAMPLE EXECUTION
+================================================================================
+
+Command:
+  python -m ml.source_1.inference.dif_pca_anomaly_detector \
+    --source example_source_5vids \
+    --interval 2 \
+    --channels 5
+
+Console Output:
+  Model trained: 3 PCA components, T² limit: 11.34
+  Press Ctrl+C to stop
+  🟢 Normal | Score: 0.234 | T²: 2.64/11.34
+  🟢 Normal | Score: 0.187 | T²: 2.11/11.34
+  🔴 ANOMALY | Score: 0.847 | T²: 19.28/11.34
+  🟢 Normal | Score: 0.156 | T²: 1.76/11.34
+  ...
+
+Interpretation:
+  ✓ Detector runs indefinitely
+  ✓ Publishing anomaly scores to Redis every 2 seconds
+  ✓ Green/Red indicators show normal vs anomalous states
+  ✓ T² values compared against control limit (11.34)
+  ✓ Frontend card receives updates via WebSocket in real-time
+
+
+================================================================================
+COMMAND-LINE ARGUMENTS
+================================================================================
+
+--source SOURCE_NAME (required)
+  Name of the data source (e.g., "example_source_5vids")
+
+--interval SECONDS (optional, default: 2)
+  Time between predictions (in seconds)
+
+--channels N (optional, default: 5)
+  Number of sensor channels to generate/monitor
+
+--count N (optional, default: infinite)
+  Number of predictions before stopping (default: runs forever)
+
+--score FLOAT (optional, default: 0.0 to 1.0)
+  Initial anomaly score range for synthetic data
+
+
+================================================================================
+INTEGRATION WITH FRONTEND
+================================================================================
+
+WebSocket Connection
+  URL: ws://127.0.0.1:8000/Measurements/ws/DIF_anomaly_dispatcher/{sourceName}
+
+Redis Channels
+  sources:{source_name}:anomaly:score
+    Contains: anomaly_score, t2_statistic, is_anomaly, timestamp
+    
+  sources:{source_name}:anomaly:contributions
+    Contains: channel contributions, dif_violations, timestamp
+
+Frontend Display
+  ✓ Real-time score with color coding (green/yellow/red)
+  ✓ Time series plot of anomaly scores
+  ✓ Bar chart of channel contributions
+  ✓ Connection status indicator
+  ✓ Live update interval: ~2 seconds
+
+
+================================================================================
+CONFIGURATION PARAMETERS
+================================================================================
+
+n_components (int or None)
+  Default: None (auto-select for 95% variance)
+  Effect: Controls PCA compression level
+  
+alpha (float)
+  Default: 0.01 (99% confidence)
+  Effect: Significance level for T² control limit
+  
+window_size (int)
+  Default: 100
+  Effect: Rolling window for DIF baseline (future use)
+
+
+================================================================================
+STATISTICAL FOUNDATION
+================================================================================
+
+Why T²?
+  - Accounts for correlation between sensors
+  - Reduces false positives vs univariate tests
+  - Statistically optimal for multivariate normal data
+
+Why PCA?
+  - Orthogonalizes correlated sensors
+  - Reduces computational cost
+  - Simplifies variance explanation
+
+Why DIF?
+  - Interpretable rule-based flagging
+  - Identifies root cause (which channel)
+  - Complements statistical T² detection
+
+Combined Power
+  - T² catches subtle multivariate shifts
+  - DIF catches single-sensor excursions
+  - Contributions identify dominant drivers
+
+
+================================================================================
+TYPICAL USE CASES
+================================================================================
+
+Manufacturing Process Monitoring
+  Detect when production parameters drift beyond normal range
+  
+Equipment Condition Monitoring
+  Identify bearing wear, thermal issues, pressure anomalies
+  
+Quality Control
+  Flag batches with unusual sensor signatures
+  
+Predictive Maintenance
+  Early warning system before equipment failure
+
+
+================================================================================
+Related Files
+================================================================================
+
+Training Script:     ml/source_1/training/
+Inference Script:    ml/source_1/inference/dif_pca_anomaly_detector.py
+Backend Endpoint:    apiserver/measurements/controller.py
+Frontend Component:  procvue_frontend/src/components/AnomalyDetectorCard.tsx
+Database Schema:     database_schema/ProcAI_Schema.sql
+
+
+================================================================================
+End of Document
+================================================================================

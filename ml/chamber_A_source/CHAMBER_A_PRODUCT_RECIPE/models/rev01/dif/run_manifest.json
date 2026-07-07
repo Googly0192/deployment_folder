@@ -1,0 +1,21 @@
+{
+  "training_file": "C:\\Projects\\ml_desktop_enterprise\\input\\training\\chamber_A.csv",
+  "test_file": null,
+  "output_root": "C:\\Projects\\ml_desktop_enterprise\\output\\dif",
+  "artifacts": {
+    "dif": [
+      "C:\\Projects\\ml_desktop_enterprise\\output\\dif\\dif\\dif_model.safetensors",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\dif\\dif\\scaler.skops",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\dif\\dif\\latent_base.safetensors",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\dif\\dif\\metadata.skops"
+    ],
+    "pca": [
+      "C:\\Projects\\ml_desktop_enterprise\\output\\dif\\pca\\pca_stats.csv",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\dif\\pca\\pca_loadings.csv",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\dif\\pca\\pca_ellipses.svg",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\dif\\pca\\pca_ellipse_params.txt",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\dif\\pca\\pca_limits.txt",
+      "C:\\Projects\\ml_desktop_enterprise\\output\\dif\\pca\\pca_scree.svg"
+    ]
+  }
+}
