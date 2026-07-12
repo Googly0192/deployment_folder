@@ -64,12 +64,16 @@ services:
       redis:
         condition: service_healthy
 
-  inference-workers:
+  dif-worker-chamber-c:
     image: flyslips/procai-suite:workers
     build:
       context: ..
       dockerfile: Production_Code/Dockerfile.workers
-    command: ["python", "-m", "workers.run_workers", "--num-workers", "4", "--cache-size", "5", "--redis-host", "redis", "--redis-port", "6379"]
+    command: ["python", "-m", "workers.inference_worker",
+              "--worker-id", "1",
+              "--source-name", "chamber_C_source",
+              "--redis-host", "redis",
+              "--redis-port", "6379"]
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -81,12 +85,16 @@ services:
     volumes:
       - ./ml:/app/ml:ro
 
-  svm-inference-worker:
+  svm-worker-chamber-c:
     image: flyslips/procai-suite:workers
     build:
       context: ..
       dockerfile: Production_Code/Dockerfile.workers
-    command: ["python", "-m", "workers.svm_inference_worker", "--worker-id", "1", "--cache-size", "5", "--redis-host", "redis", "--redis-port", "6379"]
+    command: ["python", "-m", "workers.svm_inference_worker",
+              "--worker-id", "1",
+              "--source-name", "chamber_C_source",
+              "--redis-host", "redis",
+              "--redis-port", "6379"]
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -95,6 +103,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+    volumes:
+      - ./ml:/app/ml:ro
 
   pca-worker:
     image: flyslips/procai-suite:pca
